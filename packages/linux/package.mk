@@ -16,9 +16,9 @@ PKG_PATCH_DIRS="${LINUX}"
 
 case "${LINUX}" in
   amlogic)
-    PKG_VERSION="be8b93b5cc7d533eb8c9b0590cdac055ecafe13a" # 6.0.9
-    PKG_SHA256="d32f975add35f62ad1a0fe7207fd6503c566a60faf856b037008d4d6471e7a8d"
-    PKG_URL="https://github.com/torvalds/linux/archive/${PKG_VERSION}.tar.gz"
+    PKG_VERSION="6.0.10"
+    PKG_SHA256="a2c5327f421ee1fb95f114af9a1587063081db115346e845ce5588b023a5a188"
+    PKG_URL="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/snapshot/${PKG_NAME}-${PKG_VERSION}.tar.gz"
     PKG_SOURCE_NAME="linux-${LINUX}-${PKG_VERSION}.tar.gz"
     ;;
   raspberrypi)
