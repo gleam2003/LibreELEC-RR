@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Frank Hartung (supervisedthinking (@) gmail.com)
 
 PKG_NAME="pcsx2"
-PKG_VERSION="9b2caa6fdd8483d729efe7af82ea139d71c65084" #r1.7.3693
+PKG_VERSION="facbfa479b084a75a2909f0837f2b7bf6f9b6d8f" #r1.7.3715
 PKG_ARCH="x86_64"
 PKG_LICENSE="GPL-2.0-or-later"
 PKG_SITE="https://github.com/PCSX2/pcsx2"
