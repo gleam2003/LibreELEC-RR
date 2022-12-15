@@ -283,6 +283,16 @@ configure_package() {
                          ${KODI_PIPEWIRE}"
 }
 
+post_unpack(){
+  if [ ! "$OEM_APPS" = "no" ] && [ "$PROJECT" = "Generic" ]; then
+    cp $PKG_DIR/files/app-menu-icons/* $PKG_BUILD/addons/skin.estuary/media/
+  fi
+
+  if [ ! "$OEM_EMU" = "no" ]; then
+    cp $PKG_DIR/files/emu-menu-icons/* $PKG_BUILD/addons/skin.estuary/media/
+  fi
+}
+
 configure_host() {
   setup_toolchain target:cmake
   cmake ${CMAKE_GENERATOR_NINJA} \
