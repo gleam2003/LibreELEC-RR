@@ -35,7 +35,7 @@ show_config() {
   config_message+="\n - Default Linker:\t\t\t ${DEFAULT_LINKER}"
   config_message+="\n - LLVM support:\t\t\t ${LLVM_SUPPORT}"
   config_message+="\n - DEBUG:\t\t\t\t ${DEBUG:-no}"
-  config_message+="\n - CFLAGS:\t\t\t\t ${TARGET_CFLAGS}"
+  config_message+="\n - CFLAGS:\t\t\t\t $(sed 's/ /\n\t\t\t\t\t /g' <<< $(sed 's/  / /g' <<< ${TARGET_CFLAGS}))"
   config_message+="\n - LDFLAGS:\t\t\t\t $(sed 's/^ *//' <<< ${TARGET_LDFLAGS})"
   config_message+="\n - Local Ccache:\t\t\t ${LOCAL_CCACHE:-no}"
 
