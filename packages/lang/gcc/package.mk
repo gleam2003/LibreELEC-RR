@@ -23,7 +23,7 @@ case ${TARGET_ARCH} in
     OPTS_LIBATOMIC="--enable-libatomic"
     ;;
   *)
-    OPTS_LIBATOMIC="--disable-libatomic"
+    OPTS_LIBATOMIC="--enable-libatomic"
     ;;
 esac
 
