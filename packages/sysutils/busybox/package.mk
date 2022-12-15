@@ -213,3 +213,8 @@ makeinstall_init() {
       -i ${INSTALL}/init
   chmod 755 ${INSTALL}/init
 }
+
+post_makeinstall_target() {
+  # workaround for broken xz decompression - use xz binary instead
+  rm -rf ${INSTALL}/usr/bin/xz
+}
