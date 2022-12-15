@@ -29,4 +29,8 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-shared --enable-static \
 
 post_makeinstall_target() {
   rm -rf ${INSTALL}
+
+  # workaround for broken busybox xz decompression
+  mkdir -p ${INSTALL}/usr/bin
+    cp -v ${PKG_BUILD}/.${TARGET_NAME}/src/xz/xz ${INSTALL}/usr/bin
 }
