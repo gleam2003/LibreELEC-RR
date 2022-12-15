@@ -32,3 +32,8 @@ pre_configure_target() {
     PKG_MESON_OPTS_TARGET+=" -Dbuiltin_loaders=all"
   fi
 }
+
+post_makeinstall_target() {
+  mkdir -p ${INSTALL}/usr/lib/gdk-pixbuf-2.0/2.10.0/
+    cp ${PKG_DIR}/config/* ${INSTALL}/usr/lib/gdk-pixbuf-2.0/2.10.0/
+}
