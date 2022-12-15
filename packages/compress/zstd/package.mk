@@ -33,3 +33,9 @@ configure_host() {
         -DZSTD_BUILD_TESTS=OFF \
         ${PKG_CMAKE_SCRIPT%/*}
 }
+
+pre_configure_target() {
+  PKG_CMAKE_OPTS_TARGET="-DZSTD_LEGACY_SUPPORT=0 \
+                         -DZSTD_BUILD_PROGRAMS=OFF \
+                         -DZSTD_BUILD_TESTS=OFF"
+}
