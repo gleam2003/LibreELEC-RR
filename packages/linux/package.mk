@@ -16,8 +16,8 @@ PKG_PATCH_DIRS="${LINUX}"
 
 case "${LINUX}" in
   amlogic)
-    PKG_VERSION="6.0.12"
-    PKG_SHA256="4edcf42204a68c13dc9b6bb4fe994fb9f6096b15fa960c14357fb3864f644912"
+    PKG_VERSION="6.0.13"
+    PKG_SHA256="3768610a90d9dca367f040a84f588a1d2301c0d8942efe8931138d7c26778099"
     PKG_URL="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/snapshot/${PKG_NAME}-${PKG_VERSION}.tar.gz"
     PKG_SOURCE_NAME="linux-${LINUX}-${PKG_VERSION}.tar.gz"
     ;;
