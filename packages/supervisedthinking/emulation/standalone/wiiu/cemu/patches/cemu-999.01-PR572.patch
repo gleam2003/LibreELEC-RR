@@ -1,0 +1,331 @@
+From d072c30c27f65e3c3c37be78d8447e3a779d43f8 Mon Sep 17 00:00:00 2001
+From: ssimco <ssimco-github@proton.me>
+Date: Fri, 9 Dec 2022 18:30:55 +0200
+Subject: [PATCH 1/4] Add cmake module for wayland
+
+---
+ CMakeLists.txt          |  2 ++
+ cmake/FindWayland.cmake | 14 ++++++++++++++
+ 2 files changed, 16 insertions(+)
+ create mode 100644 cmake/FindWayland.cmake
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 28ac8760..8aa3128f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -114,6 +114,8 @@ endif()
+ 
+ if (UNIX AND NOT APPLE)
+ 	find_package(X11 REQUIRED)
++	find_package(Wayland REQUIRED)
++	include_directories(${WAYLAND_INCLUDE_DIR})
+ 	find_package(GTK3 REQUIRED)
+ endif()
+ 
+diff --git a/cmake/FindWayland.cmake b/cmake/FindWayland.cmake
+new file mode 100644
+index 00000000..6a5008c7
+--- /dev/null
++++ b/cmake/FindWayland.cmake
+@@ -0,0 +1,14 @@
++find_package(PkgConfig)
++
++if(PKG_CONFIG_FOUND)
++    pkg_check_modules(WAYLAND_CLIENT REQUIRED IMPORTED_TARGET wayland-client)
++
++    if(WAYLAND_CLIENT_FOUND)
++        find_path(WAYLAND_CLIENT_INCLUDE_DIR NAMES wayland-client.h HINTS ${WAYLAND_CLIENT_INCLUDE_DIRS})
++        add_library(Wayland::client ALIAS PkgConfig::WAYLAND_CLIENT)
++    endif()
++
++    set(WAYLAND_INCLUDE_DIR ${WAYLAND_CLIENT_INCLUDE_DIR})
++    set(WAYLAND_LIBRARIES ${WAYLAND_CLIENT_LIBRARIES})
++    find_package_handle_standard_args(Wayland DEFAULT_MSG WAYLAND_LIBRARIES WAYLAND_INCLUDE_DIR)
++endif()
+
+From 4d4b9c365e5f87a266913b60ba0a6e8d56f28610 Mon Sep 17 00:00:00 2001
+From: ssimco <ssimco-github@proton.me>
+Date: Mon, 12 Dec 2022 04:08:04 +0200
+Subject: [PATCH 2/4] Make wayland optional
+
+---
+ CMakeLists.txt                                       | 11 +++++++++--
+ src/CMakeLists.txt                                   |  4 +++-
+ src/Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.cpp | 11 +++++++++--
+ src/Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.h   |  2 ++
+ src/gui/canvas/VulkanCanvas.cpp                      |  4 ++--
+ src/gui/canvas/VulkanCanvas.h                        |  4 ++--
+ src/gui/guiWrapper.cpp                               |  8 ++++++--
+ src/gui/guiWrapper.h                                 |  7 +++++--
+ 8 files changed, 38 insertions(+), 13 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8aa3128f..62b39924 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -70,6 +70,10 @@ if (APPLE)
+     enable_language(OBJC OBJCXX)
+ endif()
+ 
++if (UNIX AND NOT APPLE)
++	option(ENABLE_WAYLAND "Build with Wayland support" ON)
++endif()
++
+ option(ENABLE_OPENGL "Enables the OpenGL backend" ON)
+ option(ENABLE_VULKAN "Enables the Vulkan backend" ON)
+ option(ENABLE_DISCORD_RPC "Enables the Discord Rich Presence feature" ON)
+@@ -114,8 +118,11 @@ endif()
+ 
+ if (UNIX AND NOT APPLE)
+ 	find_package(X11 REQUIRED)
+-	find_package(Wayland REQUIRED)
+-	include_directories(${WAYLAND_INCLUDE_DIR})
++	if (ENABLE_WAYLAND)
++		find_package(Wayland REQUIRED)
++		include_directories(${WAYLAND_INCLUDE_DIR})
++		add_compile_definitions(HAS_WAYLAND)
++	endif()
+ 	find_package(GTK3 REQUIRED)
+ endif()
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index d44158e4..33a86883 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -27,8 +27,10 @@ elseif(UNIX)
+ 		add_compile_definitions(
+ 			VK_USE_PLATFORM_XLIB_KHR # legacy. Do we need to support XLIB surfaces?
+ 			VK_USE_PLATFORM_XCB_KHR
+-			VK_USE_PLATFORM_WAYLAND_KHR
+ 		)
++		if (ENABLE_WAYLAND)
++			add_compile_definitions(VK_USE_PLATFORM_WAYLAND_KHR)
++		endif()
+ 	endif()
+ 	add_compile_options(-maes)
+ 	# warnings
+diff --git a/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.cpp b/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.cpp
+index b9364051..f3793ed7 100644
+--- a/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.cpp
++++ b/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.cpp
+@@ -110,8 +110,10 @@ std::vector<VulkanRenderer::DeviceInfo> VulkanRenderer::GetDevices()
+ 	auto backend = gui_getWindowInfo().window_main.backend;
+ 	if(backend == WindowHandleInfo::Backend::X11)
+ 		requiredExtensions.emplace_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
++	#ifdef HAS_WAYLAND
+ 	else if (backend == WindowHandleInfo::Backend::WAYLAND)
+ 		requiredExtensions.emplace_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
++	#endif
+ 	#elif BOOST_OS_MACOS
+ 	requiredExtensions.emplace_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
+ 	#endif
+@@ -1156,8 +1158,10 @@ std::vector<const char*> VulkanRenderer::CheckInstanceExtensionSupport(FeatureCo
+ 	auto backend = gui_getWindowInfo().window_main.backend;
+ 	if(backend == WindowHandleInfo::Backend::X11)
+ 		requiredInstanceExtensions.emplace_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
++	#if HAS_WAYLAND
+ 	else if (backend == WindowHandleInfo::Backend::WAYLAND)
+ 		requiredInstanceExtensions.emplace_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
++	#endif
+ 	#elif BOOST_OS_MACOS
+ 	requiredInstanceExtensions.emplace_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
+ 	#endif
+@@ -1275,7 +1279,7 @@ VkSurfaceKHR VulkanRenderer::CreateXcbSurface(VkInstance instance, xcb_connectio
+ 
+     return result;
+ }
+-
++#ifdef HAS_WAYLAND
+ VkSurfaceKHR VulkanRenderer::CreateWaylandSurface(VkInstance instance, wl_display* display, wl_surface* surface)
+ {
+     VkWaylandSurfaceCreateInfoKHR sci{};
+@@ -1294,7 +1298,8 @@ VkSurfaceKHR VulkanRenderer::CreateWaylandSurface(VkInstance instance, wl_displa
+ 
+     return result;
+ }
+-#endif
++#endif // HAS_WAYLAND
++#endif // BOOST_OS_LINUX
+ 
+ VkSurfaceKHR VulkanRenderer::CreateFramebufferSurface(VkInstance instance, struct WindowHandleInfo& windowInfo)
+ {
+@@ -1303,8 +1308,10 @@ VkSurfaceKHR VulkanRenderer::CreateFramebufferSurface(VkInstance instance, struc
+ #elif BOOST_OS_LINUX
+ 	if(windowInfo.backend == WindowHandleInfo::Backend::X11)
+ 		return CreateXlibSurface(instance, windowInfo.xlib_display, windowInfo.xlib_window);
++	#ifdef HAS_WAYLAND
+ 	if(windowInfo.backend == WindowHandleInfo::Backend::WAYLAND)
+ 		return CreateWaylandSurface(instance, windowInfo.display, windowInfo.surface);
++	#endif
+ 	return {};
+ #elif BOOST_OS_MACOS
+ 	return CreateCocoaSurface(instance, windowInfo.handle);
+diff --git a/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.h b/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.h
+index 96ac9480..81c3801d 100644
+--- a/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.h
++++ b/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.h
+@@ -201,7 +201,9 @@ class VulkanRenderer : public Renderer
+ #if BOOST_OS_LINUX
+ 	static VkSurfaceKHR CreateXlibSurface(VkInstance instance, Display* dpy, Window window);
+     static VkSurfaceKHR CreateXcbSurface(VkInstance instance, xcb_connection_t* connection, xcb_window_t window);
++	#ifdef HAS_WAYLAND
+ 	static VkSurfaceKHR CreateWaylandSurface(VkInstance instance, wl_display* display, wl_surface* surface);
++	#endif
+ #endif
+ 
+ 	static VkSurfaceKHR CreateFramebufferSurface(VkInstance instance, struct WindowHandleInfo& windowInfo);
+diff --git a/src/gui/canvas/VulkanCanvas.cpp b/src/gui/canvas/VulkanCanvas.cpp
+index 53130048..a9677f9c 100644
+--- a/src/gui/canvas/VulkanCanvas.cpp
++++ b/src/gui/canvas/VulkanCanvas.cpp
+@@ -14,7 +14,7 @@ VulkanCanvas::VulkanCanvas(wxWindow* parent, const wxSize& size, bool is_main_wi
+ 	{
+ 		WindowHandleInfo& canvasMain = gui_getWindowInfo().canvas_main;
+ 		gui_initHandleContextFromWxWidgetsWindow(canvasMain, this);
+-		#if BOOST_OS_LINUX
++		#if BOOST_OS_LINUX && HAS_WAYLAND
+ 		if(canvasMain.backend == WindowHandleInfo::Backend::WAYLAND)
+ 		{	
+ 			m_subsurface = std::make_unique<wxWlSubsurface>(this);
+@@ -65,7 +65,7 @@ void VulkanCanvas::OnPaint(wxPaintEvent& event)
+ 
+ void VulkanCanvas::OnResize(wxSizeEvent& event)
+ {
+-#if BOOST_OS_LINUX
++#if BOOST_OS_LINUX && HAS_WAYLAND
+ 	if(m_subsurface)
+ 	{
+ 		int32_t x,y;
+diff --git a/src/gui/canvas/VulkanCanvas.h b/src/gui/canvas/VulkanCanvas.h
+index 5d866cf0..6cd4cba0 100644
+--- a/src/gui/canvas/VulkanCanvas.h
++++ b/src/gui/canvas/VulkanCanvas.h
+@@ -6,13 +6,13 @@
+ 
+ #include "Cafe/HW/Latte/Renderer/Vulkan/VulkanAPI.h"
+ #include <set>
+-#if BOOST_OS_LINUX
++#if BOOST_OS_LINUX && HAS_WAYLAND
+ #include "gui/helpers/wxWayland.h"
+ #endif
+ 
+ class VulkanCanvas : public IRenderCanvas, public wxWindow
+ {
+-#if BOOST_OS_LINUX
++#if BOOST_OS_LINUX && HAS_WAYLAND
+ 	std::unique_ptr<wxWlSubsurface> m_subsurface;
+ #endif
+ public:
+diff --git a/src/gui/guiWrapper.cpp b/src/gui/guiWrapper.cpp
+index 3ea04d72..1a5e999b 100644
+--- a/src/gui/guiWrapper.cpp
++++ b/src/gui/guiWrapper.cpp
+@@ -3,8 +3,10 @@
+ #include <gdk/gdk.h>
+ #include <gdk/gdkwindow.h>
+ #include <gdk/gdkx.h>
++#ifdef HAS_WAYLAND
+ #include <gdk/gdkwayland.h>
+ #endif
++#endif
+ 
+ #include "gui/wxgui.h"
+ #include "gui/guiWrapper.h"
+@@ -219,16 +221,18 @@ void gui_initHandleContextFromWxWidgetsWindow(WindowHandleInfo& handleInfoOut, c
+ 			cemuLog_log(LogType::Force, "Unable to get xlib display");
+ 		}
+ 	}
+-	else if(GDK_IS_WAYLAND_WINDOW(gdkWindow))
++	else 
++#ifdef HAS_WAYLAND
++	if(GDK_IS_WAYLAND_WINDOW(gdkWindow))
+ 	{
+ 		handleInfoOut.backend = WindowHandleInfo::Backend::WAYLAND;
+ 		handleInfoOut.surface = gdk_wayland_window_get_wl_surface(gdkWindow);
+ 		handleInfoOut.display = gdk_wayland_display_get_wl_display(gdkDisplay);
+ 	}
+ 	else
++#endif
+ 	{
+ 		cemuLog_log(LogType::Force, "Unsuported GTK backend");
+-
+ 	}
+ #else
+ 	handleInfoOut.handle = wxw->GetHandle();
+diff --git a/src/gui/guiWrapper.h b/src/gui/guiWrapper.h
+index ed9f6667..7649d816 100644
+--- a/src/gui/guiWrapper.h
++++ b/src/gui/guiWrapper.h
+@@ -5,8 +5,10 @@
+ #if BOOST_OS_LINUX
+ #include "xcb/xproto.h"
+ #include <gdk/gdkkeysyms.h>
++#if HAS_WAYLAND
+ #include <wayland-client.h>
+-#endif
++#endif // HAS_WAYLAND
++#endif // BOOST_OS_LINUX
+ 
+ #if BOOST_OS_MACOS
+ #include <Carbon/Carbon.h>
+@@ -29,9 +31,10 @@ struct WindowHandleInfo
+ 	// XCB (not used by GTK so we cant retrieve these without making our own window)
+ 	//xcb_connection_t* xcb_con{};
+ 	//xcb_window_t xcb_window{};
+-	// Wayland
++	#ifdef HAS_WAYLAND
+ 	wl_display* display;
+ 	wl_surface* surface;
++	#endif // HAS_WAYLAND
+ #else
+ 	void* handle;
+ #endif
+
+From 93e59fbadca97370f2a9ca8f5773dfe34d723190 Mon Sep 17 00:00:00 2001
+From: ssimco <ssimco-github@proton.me>
+Date: Mon, 12 Dec 2022 05:21:39 +0200
+Subject: [PATCH 3/4] Link wayland-client
+
+---
+ src/gui/CMakeLists.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/gui/CMakeLists.txt b/src/gui/CMakeLists.txt
+index a08891db..7ee9d035 100644
+--- a/src/gui/CMakeLists.txt
++++ b/src/gui/CMakeLists.txt
+@@ -150,6 +150,9 @@ target_link_libraries(CemuGui PRIVATE
+ if(ENABLE_WXWIDGETS AND UNIX AND NOT APPLE)
+ 	# PUBLIC because gdk/gdkkeysyms.h is included in guiWrapper.h
+ 	target_link_libraries(CemuGui PUBLIC GTK3::gtk)
++  if (ENABLE_WAYLAND)
++    target_link_libraries(CemuGui PUBLIC Wayland::client)
++  endif()
+ endif()
+ 
+ if(ENABLE_CUBEB)
+
+From 60f9fc926be3f814f28571b89f2e491756e3c1b6 Mon Sep 17 00:00:00 2001
+From: ssimco <ssimco-github@proton.me>
+Date: Mon, 12 Dec 2022 17:31:57 +0200
+Subject: [PATCH 4/4] Add wayland check for vulkan function
+
+---
+ src/Cafe/HW/Latte/Renderer/Vulkan/VulkanAPI.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanAPI.h b/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanAPI.h
+index becd1c8d..de4f1bb8 100644
+--- a/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanAPI.h
++++ b/src/Cafe/HW/Latte/Renderer/Vulkan/VulkanAPI.h
+@@ -129,8 +129,10 @@ VKFUNC_DEVICE(vkCmdBindPipeline);
+ #if BOOST_OS_LINUX
+ VKFUNC_INSTANCE(vkCreateXlibSurfaceKHR);
+ VKFUNC_INSTANCE(vkCreateXcbSurfaceKHR);
++#ifdef HAS_WAYLAND
+ VKFUNC_INSTANCE(vkCreateWaylandSurfaceKHR);
+ #endif
++#endif
+ 
+ #if BOOST_OS_WINDOWS
+ VKFUNC_INSTANCE(vkCreateWin32SurfaceKHR);

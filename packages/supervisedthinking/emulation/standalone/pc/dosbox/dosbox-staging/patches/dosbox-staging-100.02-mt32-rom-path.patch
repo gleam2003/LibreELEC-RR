@@ -1,0 +1,12 @@
+--- a/src/midi/midi_mt32.cpp
++++ b/src/midi/midi_mt32.cpp
+@@ -252,6 +252,8 @@
+ 	std::deque<std::string> dirs = {
+ 	        xdg_data_home + "/dosbox/mt32-roms/",
+ 	        xdg_data_home + "/mt32-rom-data/",
++	        "/tmp/emulation/bios/",
++	        "/tmp/emulation/bios/mt32-roms/",
+ 	};
+ 
+ 	// Second priority are the $XDG_DATA_DIRS
+

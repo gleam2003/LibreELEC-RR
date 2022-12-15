@@ -1,0 +1,11 @@
+--- a/3rdparty/bgfx/src/config.h
++++ b/3rdparty/bgfx/src/config.h
+@@ -12,7 +12,7 @@
+ #	define BGFX_CONFIG_DEBUG 0
+ #endif // BGFX_CONFIG_DEBUG
+ 
+-#if !defined(BGFX_CONFIG_RENDERER_DIRECT3D9) \
++#if 0 && !defined(BGFX_CONFIG_RENDERER_DIRECT3D9) \
+ 	&& !defined(BGFX_CONFIG_RENDERER_DIRECT3D11) \
+ 	&& !defined(BGFX_CONFIG_RENDERER_DIRECT3D12) \
+ 	&& !defined(BGFX_CONFIG_RENDERER_METAL) \

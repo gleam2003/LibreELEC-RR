@@ -1,0 +1,20 @@
+--- a/meson.build
++++ b/meson.build
+@@ -378,15 +378,7 @@
+ 
+ # The system has SpeexDSP, so test its floating-point handling
+ if speexdsp_dep.found()
+-    system_speexdsp_test = cxx.run(
+-        files('contrib/check-speexdsp/test_speexdsp_float_api.cpp'),
+-        dependencies: speexdsp_dep,
+-        name: 'SpeexDSP system library has reliable floating-point API',
+-    )
+-    is_system_speexdsp_reliable = (
+-        system_speexdsp_test.compiled()
+-        and system_speexdsp_test.returncode() == 0
+-    )
++    is_system_speexdsp_reliable = true
+     if is_system_speexdsp_reliable
+         speexdsp_summary_msg = 'system library'
+     endif
+

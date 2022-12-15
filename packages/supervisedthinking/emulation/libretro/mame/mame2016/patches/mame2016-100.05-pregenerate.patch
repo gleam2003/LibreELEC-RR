@@ -1,0 +1,22 @@
+--- a/makefile
++++ b/makefile
+@@ -1201,16 +1201,19 @@ $(PROJECTDIR)/gmake-linux/Makefile: make
+ .PHONY: linux_x64
+ linux_x64: generate $(PROJECTDIR)/gmake-linux/Makefile
+ 	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/gmake-linux config=$(CONFIG)64 precompile
++	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/gmake-linux config=$(CONFIG)64 dasm
+ 	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/gmake-linux config=$(CONFIG)64
+ 
+ .PHONY: linux_x86
+ linux_x86: generate $(PROJECTDIR)/gmake-linux/Makefile
+ 	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/gmake-linux config=$(CONFIG)32 precompile
++	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/gmake-linux config=$(CONFIG)32 dasm
+ 	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/gmake-linux config=$(CONFIG)32
+ 
+ .PHONY: linux
+ linux: generate $(PROJECTDIR)/gmake-linux/Makefile
+ 	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/gmake-linux config=$(CONFIG) precompile
++	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/gmake-linux config=$(CONFIG) dasm
+ 	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/gmake-linux config=$(CONFIG)
+ 
+ #-------------------------------------------------

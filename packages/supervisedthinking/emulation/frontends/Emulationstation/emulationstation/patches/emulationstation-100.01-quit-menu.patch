@@ -1,0 +1,112 @@
+From c1265d7a5b5ee4750052cc2988d0c5aba4fa9708 Mon Sep 17 00:00:00 2001
+From: SupervisedThinking <supervisedthinking@gmail.com>
+Date: Mon, 17 Oct 2022 16:59:32 +0200
+Subject: [PATCH] GuiMenu: add quit menu
+
+---
+ es-app/src/guis/GuiMenu.cpp | 92 +++----------------------------------
+ 1 file changed, 7 insertions(+), 85 deletions(-)
+
+diff --git a/es-app/src/guis/GuiMenu.cpp b/es-app/src/guis/GuiMenu.cpp
+index 09f377e0d9..3bc969abb6 100644
+--- a/es-app/src/guis/GuiMenu.cpp
++++ b/es-app/src/guis/GuiMenu.cpp
+@@ -513,91 +513,13 @@ void GuiMenu::openConfigInput()
+ 
+ void GuiMenu::openQuitMenu()
+ {
+-	auto s = new GuiSettings(mWindow, "QUIT");
+-
+-	Window* window = mWindow;
+-
+-	// command line switch
+-	bool confirm_quit = Settings::getInstance()->getBool("ConfirmQuit");
+-
+-	ComponentListRow row;
+-	if (UIModeController::getInstance()->isUIModeFull())
+-	{
+-		auto static restart_es_fx = []() {
+-			Scripting::fireEvent("quit");
+-			if (quitES(QuitMode::RESTART)) {
+-				LOG(LogWarning) << "Restart terminated with non-zero result!";
+-			}
+-		};
+-
+-		if (confirm_quit) {
+-			row.makeAcceptInputHandler([window] {
+-				window->pushGui(new GuiMsgBox(window, "REALLY RESTART?", "YES", restart_es_fx, "NO", nullptr));
+-			});
+-		} else {
+-			row.makeAcceptInputHandler(restart_es_fx);
+-		}
+-		row.addElement(std::make_shared<TextComponent>(window, "RESTART EMULATIONSTATION", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+-		s->addRow(row);
+-
+-		if(Settings::getInstance()->getBool("ShowExit"))
+-		{
+-			auto static quit_es_fx = [] {
+-				Scripting::fireEvent("quit");
+-				quitES();
+-			};
+-
+-			row.elements.clear();
+-			if (confirm_quit) {
+-				row.makeAcceptInputHandler([window] {
+-					window->pushGui(new GuiMsgBox(window, "REALLY QUIT?", "YES", quit_es_fx, "NO", nullptr));
+-				});
+-			} else {
+-				row.makeAcceptInputHandler(quit_es_fx);
+-			}
+-			row.addElement(std::make_shared<TextComponent>(window, "QUIT EMULATIONSTATION", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+-			s->addRow(row);
+-		}
+-	}
+-
+-	auto static reboot_sys_fx = [] {
+-		Scripting::fireEvent("quit", "reboot");
+-		Scripting::fireEvent("reboot");
+-		if (quitES(QuitMode::REBOOT)) {
+-			LOG(LogWarning) << "Restart terminated with non-zero result!";
+-		}
+-	};
+-
+-	row.elements.clear();
+-	if (confirm_quit) {
+-		row.makeAcceptInputHandler([window] {
+-			window->pushGui(new GuiMsgBox(window, "REALLY RESTART?", "YES", {reboot_sys_fx}, "NO", nullptr));
+-		});
+-	} else {
+-		row.makeAcceptInputHandler(reboot_sys_fx);
+-	}
+-	row.addElement(std::make_shared<TextComponent>(window, "RESTART SYSTEM", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+-	s->addRow(row);
+-
+-	auto static shutdown_sys_fx = [] {
+-		Scripting::fireEvent("quit", "shutdown");
+-		Scripting::fireEvent("shutdown");
+-		if (quitES(QuitMode::SHUTDOWN)) {
+-			LOG(LogWarning) << "Shutdown terminated with non-zero result!";
+-		}
+-	};
+-
+-	row.elements.clear();
+-	if (confirm_quit) {
+-		row.makeAcceptInputHandler([window] {
+-			window->pushGui(new GuiMsgBox(window, "REALLY SHUTDOWN?", "YES", shutdown_sys_fx, "NO", nullptr));
+-		});
+-	} else {
+-		row.makeAcceptInputHandler(shutdown_sys_fx);
+-	}
+-	row.addElement(std::make_shared<TextComponent>(window, "SHUTDOWN SYSTEM", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+-	s->addRow(row);
+-	mWindow->pushGui(s);
++    Window* window = mWindow;
++	window->pushGui(new GuiMsgBox(window, "REALLY QUIT?", "YES",
++    [] {
++    SDL_Event ev;
++    ev.type = SDL_QUIT;
++    SDL_PushEvent(&ev);
++    }, "NO", nullptr));
+ }
+ 
+ void GuiMenu::addVersionInfo()
