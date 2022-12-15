@@ -11,6 +11,7 @@ PKG_URL="https://github.com/libsndfile/libsamplerate/releases/download/${PKG_VER
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="A Sample Rate Converter for audio."
 PKG_TOOLCHAIN="autotools"
+PKG_BUILD_FLAGS="+pic"
 
 # package specific configure options
 PKG_CONFIGURE_OPTS_TARGET="--disable-shared \
