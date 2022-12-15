@@ -1,0 +1,22 @@
+From f43adbb74a57f0c88b6d6cef8d249e01638bd63c Mon Sep 17 00:00:00 2001
+From: SupervisedThinking <supervisedthinking@gmail.com>
+Date: Tue, 15 Nov 2022 16:35:38 +0100
+Subject: [PATCH] platform: add .ccd to pcenginecd files
+
+---
+ src/platform.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/platform.cpp b/src/platform.cpp
+index 70954ff4..02c57a74 100644
+--- a/src/platform.cpp
++++ b/src/platform.cpp
+@@ -484,7 +484,7 @@ QString Platform::getFormats(QString platform, QString extensions, QString addEx
+   } else if(platform == "pcengine") {
+     formats.append("*.pce *.chd *.cue");
+   } else if(platform == "pcenginecd") {
+-    formats.append("*.pce *.chd *.cue");
++    formats.append("*.pce *.chd *.ccd *.cue");
+   } else if(platform == "pico8") {
+     formats.append("*.png *.p8");
+   } else if(platform == "pokemini") {
