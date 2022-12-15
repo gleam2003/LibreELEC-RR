@@ -180,6 +180,11 @@ case "${DISTRO}" in
         [java]=jdk8-openjdk
         [python3]=python3
         [rpcgen]=rpcsvc-proto
+        [xa]=xa
+        [makeinfo]=texinfo
+        [cabextract]=cabextract
+        [curl]=curl
+        [gdk-pixbuf-pixdata]=gdk-pixbuf2
       )
       perl_map+=(
         [JSON]=perl-json
@@ -219,6 +224,11 @@ case "${DISTRO}" in
         [xsltproc]=xsltproc
         [java]=default-jre
         [python3]=python3
+        [xa]=xa65
+        [makeinfo]=texinfo
+        [cabextract]=cabextract
+        [curl]=curl
+        [gdk-pixbuf-pixdata]=libgdk-pixbuf2.0-bin
       )
       ;;
 esac
