@@ -11,6 +11,7 @@ PKG_LONGDESC="A PSP emulator for Android, Windows, Mac, Linux and Blackberry 10,
 GET_HANDLER_SUPPORT="git"
 PKG_GIT_CLONE_BRANCH="master"
 PKG_GIT_CLONE_SINGLE="yes"
+PKG_NEED_UNPACK="$(get_pkg_directory ppsspp)"
 PKG_BUILD_FLAGS="-sysroot"
 
 PKG_LIBNAME="ppsspp_libretro.so"
