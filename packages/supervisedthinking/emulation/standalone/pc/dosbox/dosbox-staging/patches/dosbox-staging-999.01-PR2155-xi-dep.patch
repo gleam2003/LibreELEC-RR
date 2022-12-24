@@ -1,0 +1,103 @@
+From 871d796c93d0b8750f0c7d1adc3925123a0c5034 Mon Sep 17 00:00:00 2001
+From: kcgen <kcgen@users.noreply.github.com>
+Date: Fri, 23 Dec 2022 18:41:05 -0800
+Subject: [PATCH] Make the xinput2 library optional for ManyMouse
+
+---
+ meson.build                      | 12 +++++-------
+ src/config.h.in                  |  4 +++-
+ src/libs/manymouse/meson.build   |  7 ++++---
+ src/libs/manymouse/x11_xinput2.c |  4 ++++
+ 4 files changed, 16 insertions(+), 11 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 2599e1299c..092a35ebc1 100644
+--- a/meson.build
++++ b/meson.build
+@@ -715,6 +715,11 @@ endif
+ conf_data.set10('C_MANYMOUSE', true)
+ manymouse_summary_msg = 'Enabled'
+ 
++# The ManyMouse library support the XInput 2 protocol, regardless
++# of OS, which we indicate using the SUPPORT_XINPUT2 define.
++xi_dep = dependency('xi', required: false)
++conf_data.set10('SUPPORT_XINPUT2', xi_dep.found())
++
+ if host_machine.system() == 'darwin'
+   if not conf_data.has('C_IOKIT')
+     manymouse_summary_msg = 'Disabled due to host missing IOKit'
+@@ -751,13 +756,6 @@ if host_machine.system() in ['windows', 'cygwin']
+   summary('Windows Multimedia support', winmm_dep.found())
+ endif
+ 
+-# X11 Input Extension dependency for ManyMouse library
+-xi_dep = optional_dep
+-using_x11 = os_family_name in ['LINUX', 'BSD']
+-if using_x11 and (conf_data.get('C_MANYMOUSE') != 0)
+-  xi_dep = dependency('xi')
+-endif
+-
+ # Setup include directories
+ incdir = include_directories('include', '.')
+ 
+diff --git a/src/config.h.in b/src/config.h.in
+index 6f6d65ed12..98f96c18b3 100644
+--- a/src/config.h.in
++++ b/src/config.h.in
+@@ -127,8 +127,10 @@
+ // Define to 1 to enable MT-32 emulator
+ #mesondefine C_MT32EMU
+ 
+-// Define to 1 to enable mouse mapping support
++// Define to 1 to enable mouse mapping support, and
++// Define SUPPORT_XINPUT2 1/0 to indicate if 'libxi' is available.
+ #mesondefine C_MANYMOUSE
++#mesondefine SUPPORT_XINPUT2
+ 
+ // Compiler supports Core Audio headers
+ #mesondefine C_COREAUDIO
+diff --git a/src/libs/manymouse/meson.build b/src/libs/manymouse/meson.build
+index 9abed77bc1..9bcc8ce544 100644
+--- a/src/libs/manymouse/meson.build
++++ b/src/libs/manymouse/meson.build
+@@ -1,19 +1,20 @@
+-manymouse_sources = files([
++manymouse_sources = files(
+   'linux_evdev.c',
+   'macosx_hidmanager.c',
+   'macosx_hidutilities.c',
+   'manymouse.c',
+   'windows_wminput.c',
+   'x11_xinput2.c',
+-])
++)
+ 
+ libmanymouse = static_library(
+   'manymouse',
+   manymouse_sources,
++  include_directories: incdir,
+   dependencies: [
+     iokit_dep,
+     xi_dep,
+   ],
+ )
+ 
+-manymouse_dep  = declare_dependency(link_with : libmanymouse)
++manymouse_dep = declare_dependency(link_with: libmanymouse)
+diff --git a/src/libs/manymouse/x11_xinput2.c b/src/libs/manymouse/x11_xinput2.c
+index d85decef55..af0b0a0a0b 100644
+--- a/src/libs/manymouse/x11_xinput2.c
++++ b/src/libs/manymouse/x11_xinput2.c
+@@ -7,8 +7,12 @@
+  *  Altered to:
+  *   - silence compiler warnings, by Roman Standzikowski.
+  *   - fix uninitialized event member access, by kcgen.
++ *   - include project config.h, by kcgen.
+  */
+ 
++/* Let the project (maybe) define SUPPORT_XINPUT2 via common header */
++#include "config.h"
++
+ #include "manymouse.h"
+ 
+ /* Try to use this on everything but Windows and Mac OS by default... */
