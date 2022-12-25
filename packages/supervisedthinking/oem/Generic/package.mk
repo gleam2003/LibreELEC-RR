@@ -80,7 +80,7 @@ OEM_EMULATORS_LIBRETRO_GENERIC_X11=" \
   boom3 \
   dolphin-libretro \
   melonds \
-  pcsx2-libretro \
+  lrps2 \
   vitaquake2 \
   vitaquake3"
 
