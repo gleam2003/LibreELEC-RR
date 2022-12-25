@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2022-present Frank Hartung (supervisedthinking (@) gmail.com)
 
-PKG_NAME="pcsx2-libretro"
-PKG_VERSION="c78bfa577fc3ea3a022b1545870b778146e3edef"
+PKG_NAME="lrps2"
+PKG_VERSION="550c67b817c32fa732278cfafde8d0ae050c1d9a"
 PKG_ARCH="x86_64"
 PKG_LICENSE="GPL-2.0-or-later"
-PKG_SITE="https://github.com/libretro/pcsx2"
-PKG_URL="https://github.com/libretro/pcsx2.git"
+PKG_SITE="https://github.com/libretro/LRPS2"
+PKG_URL="https://github.com/libretro/LRPS2.git"
 PKG_DEPENDS_TARGET="toolchain xz zlib libaio"
-PKG_LONGDESC="PCSX2 is a free and open-source PlayStation 2 (PS2) emulator."
+PKG_LONGDESC="Hard fork / port of PCSX2. Will target only Libretro specifically."
 GET_HANDLER_SUPPORT="git"
 PKG_GIT_CLONE_BRANCH="main"
 PKG_GIT_CLONE_SINGLE="yes"
