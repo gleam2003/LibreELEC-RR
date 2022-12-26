@@ -2,7 +2,7 @@
 # Copyright (C) 2022-present Frank Hartung (supervisedthinking (@) gmail.com)
 
 PKG_NAME="lrps2"
-PKG_VERSION="550c67b817c32fa732278cfafde8d0ae050c1d9a"
+PKG_VERSION="61a6af54c5af1a03ed048d83252de96971b1fd0a"
 PKG_ARCH="x86_64"
 PKG_LICENSE="GPL-2.0-or-later"
 PKG_SITE="https://github.com/libretro/LRPS2"
